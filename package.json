@@ -1,0 +1,22 @@
+{
+    "name": "revuest",
+    "version": "1.0.0",
+    "description": "Reactive Vue Storage",
+    "main": "index.js",
+    "keywords": [
+        "vue.js",
+        "reactive",
+        "storage",
+        "localStorage",
+        "sessionStorage"
+    ],
+    "author": {
+        "name": "Luiz Guilherme Thess",
+        "email": "guithess@gmail.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/guithess/revuest.git"
+    },
+    "license": "MIT"
+}
