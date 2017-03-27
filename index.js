@@ -100,7 +100,6 @@ const revuest = {
                     },
                     $default(obj) {
                         let newObj = Object.assign({}, obj, loadFromStorage("sessionStorage"));
-                        console.log(newObj);
                         saveToStorage("sessionStorage", newObj);
                     }
                 };

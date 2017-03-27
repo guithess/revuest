@@ -105,7 +105,6 @@ var revuest = {
                     },
                     $default: function $default(obj) {
                         var newObj = Object.assign({}, obj, loadFromStorage("sessionStorage"));
-                        console.log(newObj);
                         saveToStorage("sessionStorage", newObj);
                     }
                 };
