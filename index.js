@@ -105,8 +105,8 @@ const revuest = {
                 };
             },
             created() {
-                this.localStorage = loadFromStorage("localStorage"),
-                this.sessionStorage = loadFromStorage("sessionStorage")
+                this.localStorage = loadFromStorage("localStorage");
+                this.sessionStorage = loadFromStorage("sessionStorage");
 
                 window.addEventListener("storage", (e) => {
                     if (e.storageArea === window.localStorage) {
@@ -119,7 +119,7 @@ const revuest = {
                 this.$watch(function() {
                     return this.localStorage;
                 }, function() {
-                    saveToStorage("sessionStorage", this.localStorage);
+                    saveToStorage("localStorage", this.localStorage);
                 }, {
                     deep: true
                 });

@@ -1,6 +1,6 @@
 {
     "name": "revuest",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Reactive Vue Storage",
     "main": "revuest.js",
     "scripts": {
