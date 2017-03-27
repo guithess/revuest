@@ -20,6 +20,8 @@ function saveToStorage(storageType, storageObj) {
     for (let i = 0, keys = Object.keys(storageObj), len = keys.length; i < len; i++) {
         window[storageType].setItem(keys[i], JSON.stringify(storageObj[keys[i]]));
     }
+
+    window.dispatchEvent(new Event("revuest:save"));
 }
 
 function clearStorage(storageType) {
@@ -36,6 +38,16 @@ function delWrapper(storageType, key) {
 
 function getWrapper(storageType, key) {
     return parseValue(window[storageType].getItem(key));
+}
+
+function createWatcher(self, storageType) {
+    self[`$${storageType}`].$$unwatch = self.$watch(function() {
+        return self[storageType];
+    }, function() {
+        saveToStorage(storageType, self[storageType]);
+    }, {
+        deep: true
+    });
 }
 
 const revuest = {
@@ -63,6 +75,8 @@ const revuest = {
                         return getWrapper("localStorage", key);
                     },
                     $refresh() {
+                        self.$localStorage.$$unwatch();
+
                         let storedObj = loadFromStorage("localStorage");
                         for (let i = 0, keys = Object.keys(self.localStorage), len = keys.length; i < len; i++) {
                             self.$delete(self.localStorage, keys[i]);
@@ -70,6 +84,8 @@ const revuest = {
                         for (let i = 0, keys = Object.keys(storedObj), len = keys.length; i < len; i++) {
                             self.$set(self.localStorage, keys[i], storedObj[keys[i]]);
                         }
+
+                        createWatcher(self, "localStorage");
                     },
                     $default(obj) {
                         let newObj = Object.assign({}, obj, loadFromStorage("localStorage"));
@@ -90,6 +106,8 @@ const revuest = {
                         return getWrapper("sessionStorage", key);
                     },
                     $refresh() {
+                        self.$sessionStorage.$$unwatch();
+
                         let storedObj = loadFromStorage("sessionStorage");
                         for (let i = 0, keys = Object.keys(self.sessionStorage), len = keys.length; i < len; i++) {
                             self.$delete(self.sessionStorage, keys[i]);
@@ -97,6 +115,8 @@ const revuest = {
                         for (let i = 0, keys = Object.keys(storedObj), len = keys.length; i < len; i++) {
                             self.$set(self.sessionStorage, keys[i], storedObj[keys[i]]);
                         }
+
+                        createWatcher(self, "sessionStorage");
                     },
                     $default(obj) {
                         let newObj = Object.assign({}, obj, loadFromStorage("sessionStorage"));
@@ -116,21 +136,13 @@ const revuest = {
                     }
                 });
 
-                this.$watch(function() {
-                    return this.localStorage;
-                }, function() {
-                    saveToStorage("localStorage", this.localStorage);
-                }, {
-                    deep: true
+                window.addEventListener("revuest:save", (e) => {
+                    this.$localStorage.$refresh();
+                    this.$sessionStorage.$refresh();
                 });
 
-                this.$watch(function() {
-                    return this.sessionStorage;
-                }, function() {
-                    saveToStorage("sessionStorage", this.sessionStorage);
-                }, {
-                    deep: true
-                });
+                createWatcher(this, "localStorage");
+                createWatcher(this, "sessionStorage");
             }
         });
     }
