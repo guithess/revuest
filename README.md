@@ -72,6 +72,14 @@ export default {
 
 By doing so, the default values will be saved to the browser storage before Revuest initialization. Revuest uses the [Object.assign](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) function to merge the defaults with the storaged data so that any existing values do not be overwritten.
 
+### SSR - Server Side Rendering
+
+Starting on version 1.1.0, **revuest** works fine with SSR.
+
+**$localStorage.$default()** and **$sessionStorage.$default()** functions must be used to initialize the data, otherwise an empty object will be assigned to the localStorage and sessionStorage objects. The data can be referenced on the template the same way as in the client side rendering.
+
+_**Note:** By the time that the client side takes over, the default values will be reevaluated and if the data stored on the browser is different from the default values used by the server, localStorage and sessionStorage objects will be automatically updated to reflect the browser values, the same way it happens when $default() is used directly on the client side. If the data does not exist on the browser storage **it will be automatically saved to storage at this time**._
+
 
 ### License
 [MIT](LICENSE.md)
