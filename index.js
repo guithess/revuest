@@ -1,53 +1,109 @@
-function parseValue(value) {
-    try {
-        return JSON.parse(value);
-    } catch (e) {
-        return value;
-    }
-}
+const BROWSER = "BROWSER", NODE = "NODE";
+const $$platform = (typeof process === 'object' && process + '' === '[object process]') ? NODE : BROWSER;
 
-function loadFromStorage(storageType) {
-    let data = {};
-    for (let i = 0, len = window[storageType].length; i < len; ++i) {
-        let key = window[storageType].key(i);
-        let val = parseValue(window[storageType].getItem(key));
-        data[key] = val;
-    }
-    return data;
-}
+class Storage {
+    constructor(instance, storageType) {
+        this.instance = instance;
+        this.storageType = storageType;
 
-function saveToStorage(storageType, storageObj) {
-    for (let i = 0, keys = Object.keys(storageObj), len = keys.length; i < len; i++) {
-        window[storageType].setItem(keys[i], JSON.stringify(storageObj[keys[i]]));
+        this.$$defaults = {};
     }
 
-    window.dispatchEvent(new Event("revuest:save"));
-}
+    /*
+     * Instance methods
+     */
+    $clear() {
+        if ($$platform === BROWSER) {
+            window[this.storageType].clear();
+        }
+    }
 
-function clearStorage(storageType) {
-    window[storageType].clear();
-}
+    $get(key) {
+        if ($$platform === BROWSER) {
+            return Storage.parse(window[this.storageType].getItem(key));
+        } else {
+            return null
+        }
+    }
 
-function setWrapper(storageType, key, value) {
-    window[storageType].setItem(key, JSON.stringify(value));
-}
+    $set(key, value) {
+        if ($$platform === BROWSER) {
+            window[this.storageType].setItem(key, JSON.stringify(value));
+        }
+    }
 
-function delWrapper(storageType, key) {
-    window[storageType].removeItem(key);
-}
+    $del(key) {
+        if ($$platform === BROWSER) {
+            window[this.storageType].removeItem(key);
+        }
+    }
 
-function getWrapper(storageType, key) {
-    return parseValue(window[storageType].getItem(key));
-}
+    $refresh() {
+        Storage.unwatch(this.instance, this.storageType);
 
-function createWatcher(self, storageType) {
-    self[`$${storageType}`].$$unwatch = self.$watch(function() {
-        return self[storageType];
-    }, function() {
-        saveToStorage(storageType, self[storageType]);
-    }, {
-        deep: true
-    });
+        let storedObj = Storage.load(this.storageType);
+        for (let i = 0, keys = Object.keys(this.instance[this.storageType]), len = keys.length; i < len; i++) {
+            this.instance.$delete(this.instance[this.storageType], keys[i]);
+        }
+        for (let i = 0, keys = Object.keys(storedObj), len = keys.length; i < len; i++) {
+            this.instance.$set(this.instance[this.storageType], keys[i], storedObj[keys[i]]);
+        }
+
+        Storage.watch(this.instance, this.storageType);
+    }
+
+    $default(obj = {}) {
+        this.$$defaults = obj;
+
+        if ($$platform === BROWSER) {
+            Storage.save(this.storageType, Object.assign({}, obj, Storage.load(this.storageType)));
+        }
+    }
+
+    /*
+     * Static methods
+     */
+    static parse(val) {
+        try {
+            return JSON.parse(val);
+        } catch (e) {
+            return val;
+        }
+    }
+
+    static load(storageType) {
+        let data = {};
+        for (let i = 0, len = window[storageType].length; i < len; ++i) {
+            let key = window[storageType].key(i);
+            let val = Storage.parse(window[storageType].getItem(key));
+            data[key] = val;
+        }
+        return data;
+    }
+
+    static save(storageType, storageObj) {
+        for (let i = 0, keys = Object.keys(storageObj), len = keys.length; i < len; i++) {
+            window[storageType].setItem(keys[i], JSON.stringify(storageObj[keys[i]]));
+        }
+
+        window.dispatchEvent(new StorageEvent("storage", {
+            "storageArea": window[storageType]
+        }));
+    }
+
+    static watch(instance, storageType) {
+        instance[`$${storageType}`].$$unwatch = instance.$watch(function() {
+            return instance[storageType];
+        }, function() {
+            Storage.save(storageType, instance[storageType]);
+        }, {
+            deep: true
+        });
+    }
+
+    static unwatch(instance, storageType) {
+        instance[`$${storageType}`].$$unwatch();
+    }
 }
 
 const revuest = {
@@ -60,89 +116,28 @@ const revuest = {
                 }
             },
             beforeCreate() {
-                let self = this;
-                this.$localStorage = {
-                    $clear() {
-                        clearStorage("localStorage");
-                    },
-                    $set(key, value) {
-                        setWrapper("localStorage", key, value);
-                    },
-                    $del(key) {
-                        delWrapper("localStorage", key, value);
-                    },
-                    $get(key) {
-                        return getWrapper("localStorage", key);
-                    },
-                    $refresh() {
-                        self.$localStorage.$$unwatch();
-
-                        let storedObj = loadFromStorage("localStorage");
-                        for (let i = 0, keys = Object.keys(self.localStorage), len = keys.length; i < len; i++) {
-                            self.$delete(self.localStorage, keys[i]);
-                        }
-                        for (let i = 0, keys = Object.keys(storedObj), len = keys.length; i < len; i++) {
-                            self.$set(self.localStorage, keys[i], storedObj[keys[i]]);
-                        }
-
-                        createWatcher(self, "localStorage");
-                    },
-                    $default(obj) {
-                        let newObj = Object.assign({}, obj, loadFromStorage("localStorage"));
-                        saveToStorage("localStorage", newObj);
-                    }
-                };
-                this.$sessionStorage = {
-                    $clear() {
-                        clearStorage("sessionStorage");
-                    },
-                    $set(key, value) {
-                        setWrapper("sessionStorage", key, value);
-                    },
-                    $del(key) {
-                        delWrapper("sessionStorage", key, value);
-                    },
-                    $get(key) {
-                        return getWrapper("sessionStorage", key);
-                    },
-                    $refresh() {
-                        self.$sessionStorage.$$unwatch();
-
-                        let storedObj = loadFromStorage("sessionStorage");
-                        for (let i = 0, keys = Object.keys(self.sessionStorage), len = keys.length; i < len; i++) {
-                            self.$delete(self.sessionStorage, keys[i]);
-                        }
-                        for (let i = 0, keys = Object.keys(storedObj), len = keys.length; i < len; i++) {
-                            self.$set(self.sessionStorage, keys[i], storedObj[keys[i]]);
-                        }
-
-                        createWatcher(self, "sessionStorage");
-                    },
-                    $default(obj) {
-                        let newObj = Object.assign({}, obj, loadFromStorage("sessionStorage"));
-                        saveToStorage("sessionStorage", newObj);
-                    }
-                };
+                this.$localStorage = new Storage(this, "localStorage");
+                this.$sessionStorage = new Storage(this, "sessionStorage");
             },
             created() {
-                this.localStorage = loadFromStorage("localStorage");
-                this.sessionStorage = loadFromStorage("sessionStorage");
+                if ($$platform === BROWSER) {
+                    this.localStorage = Storage.load("localStorage");
+                    this.sessionStorage = Storage.load("sessionStorage");
 
-                window.addEventListener("storage", (e) => {
-                    if (e.storageArea === window.localStorage) {
-                        this.$localStorage.$refresh();
-                    } else if (e.storageArea === window.sessionStorage) {
-                        this.$sessionStorage.$refresh();
-                    }
-                });
+                    window.addEventListener("storage", (e) => {
+                        if (e.storageArea === window.localStorage) {
+                            this.$localStorage.$refresh();
+                        } else if (e.storageArea === window.sessionStorage) {
+                            this.$sessionStorage.$refresh();
+                        }
+                    });
 
-                window.addEventListener("revuest:save", (e) => {
-                    this.$localStorage.$refresh();
-                    this.$sessionStorage.$refresh();
-                });
-
-                createWatcher(this, "localStorage");
-                createWatcher(this, "sessionStorage");
+                    Storage.watch(this, "localStorage");
+                    Storage.watch(this, "sessionStorage");
+                } else {
+                    this.localStorage = this.$localStorage.$$defaults;
+                    this.sessionStorage = this.$sessionStorage.$$defaults;
+                }
             }
         });
     }
