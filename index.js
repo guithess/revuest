@@ -86,9 +86,9 @@ class Storage {
             window[storageType].setItem(keys[i], JSON.stringify(storageObj[keys[i]]));
         }
 
-        window.dispatchEvent(new StorageEvent("storage", {
-            "storageArea": window[storageType]
-        }));
+        let event = document.createEvent("StorageEvent");
+        event.initStorageEvent("storage", false, false, null, null, null, null, window[storageType]);
+        window.dispatchEvent(event);
     }
 
     static watch(instance, storageType) {

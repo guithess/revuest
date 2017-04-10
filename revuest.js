@@ -117,9 +117,9 @@ var Storage = function () {
                 window[storageType].setItem(keys[i], JSON.stringify(storageObj[keys[i]]));
             }
 
-            window.dispatchEvent(new StorageEvent("storage", {
-                "storageArea": window[storageType]
-            }));
+            var event = document.createEvent("StorageEvent");
+            event.initStorageEvent("storage", false, false, null, null, null, null, window[storageType]);
+            window.dispatchEvent(event);
         }
     }, {
         key: "watch",
