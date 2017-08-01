@@ -1,5 +1,5 @@
 const BROWSER = "BROWSER", NODE = "NODE";
-const $$platform = (typeof process === 'object' && process + '' === '[object process]') ? NODE : BROWSER;
+const $$platform = (typeof process === 'object' && process + '' === '[object process]' && !(process.versions.electron || process.versions.nwjs || process.versions['node-webkit'])) ? NODE : BROWSER;
 
 class Storage {
     constructor(instance, storageType) {

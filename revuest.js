@@ -12,7 +12,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var BROWSER = "BROWSER",
     NODE = "NODE";
-var $$platform = (typeof process === "undefined" ? "undefined" : _typeof(process)) === 'object' && process + '' === '[object process]' ? NODE : BROWSER;
+var $$platform = (typeof process === "undefined" ? "undefined" : _typeof(process)) === 'object' && process + '' === '[object process]' && !(process.versions.electron || process.versions.nwjs || process.versions['node-webkit']) ? NODE : BROWSER;
 
 var Storage = function () {
     function Storage(instance, storageType) {
