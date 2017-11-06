@@ -92,9 +92,7 @@ class Storage {
     }
 
     static watch(instance, storageType) {
-        instance[`$${storageType}`].$$unwatch = instance.$watch(function() {
-            return instance[storageType];
-        }, function() {
+        instance[`$${storageType}`].$$unwatch = instance.$watch(() => { return instance[storageType]; }, () => {
             Storage.save(storageType, instance[storageType]);
         }, {
             deep: true
@@ -124,19 +122,24 @@ const revuest = {
                     this.localStorage = Storage.load("localStorage");
                     this.sessionStorage = Storage.load("sessionStorage");
 
-                    window.addEventListener("storage", (e) => {
-                        if (e.storageArea === window.localStorage) {
-                            this.$localStorage.$refresh();
-                        } else if (e.storageArea === window.sessionStorage) {
-                            this.$sessionStorage.$refresh();
-                        }
-                    });
+                    window.addEventListener("storage", this.$$refreshStorageContent);
 
                     Storage.watch(this, "localStorage");
                     Storage.watch(this, "sessionStorage");
                 } else {
                     this.localStorage = this.$localStorage.$$defaults;
                     this.sessionStorage = this.$sessionStorage.$$defaults;
+                }
+            },
+            beforeDestroy() {
+                if ($$platform === BROWSER) {
+                    window.removeEventListener("storage", this.$$refreshStorageContent);
+                }
+            },
+            methods: {
+                $$refreshStorageContent(e) {
+                    if (e.storageArea === window.localStorage) return this.$localStorage.$refresh();
+                    if (e.storageArea === window.sessionStorage) return this.$sessionStorage.$refresh();
                 }
             }
         });

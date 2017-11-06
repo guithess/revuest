@@ -1,30 +1,30 @@
 {
-    "name": "revuest",
-    "version": "1.1.3",
-    "description": "Reactive Vue Storage",
-    "main": "revuest.js",
-    "scripts": {
-        "build": "babel index.js --out-file revuest.js"
-    },
-    "keywords": [
+	"name": "revuest",
+	"version": "1.1.4",
+	"description": "Reactive Vue Storage",
+	"main": "revuest.js",
+	"scripts": {
+		"build": "babel index.js --out-file revuest.js"
+	},
+	"keywords": [
         "vue.js",
         "reactive",
         "storage",
         "localStorage",
         "sessionStorage"
     ],
-    "author": {
-        "name": "Luiz Guilherme Thess Cardoso",
-        "email": "guithess@gmail.com"
-    },
-    "homepage": "https://github.com/guithess/revuest#readme",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/guithess/revuest.git"
-    },
-    "license": "MIT",
-    "devDependencies": {
-        "babel-cli": "^6.24.0",
-        "babel-preset-es2015": "^6.24.0"
-    }
+	"author": {
+		"name": "Luiz Guilherme Thess Cardoso",
+		"email": "guithess@gmail.com"
+	},
+	"homepage": "https://github.com/guithess/revuest#readme",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/guithess/revuest.git"
+	},
+	"license": "MIT",
+	"devDependencies": {
+		"babel-cli": "^6.24.0",
+		"babel-preset-es2015": "^6.24.0"
+	}
 }

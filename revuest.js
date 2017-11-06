@@ -156,25 +156,29 @@ var revuest = {
                 this.$sessionStorage = new Storage(this, "sessionStorage");
             },
             created: function created() {
-                var _this = this;
-
                 if ($$platform === BROWSER) {
                     this.localStorage = Storage.load("localStorage");
                     this.sessionStorage = Storage.load("sessionStorage");
 
-                    window.addEventListener("storage", function (e) {
-                        if (e.storageArea === window.localStorage) {
-                            _this.$localStorage.$refresh();
-                        } else if (e.storageArea === window.sessionStorage) {
-                            _this.$sessionStorage.$refresh();
-                        }
-                    });
+                    window.addEventListener("storage", this.$$refreshStorageContent);
 
                     Storage.watch(this, "localStorage");
                     Storage.watch(this, "sessionStorage");
                 } else {
                     this.localStorage = this.$localStorage.$$defaults;
                     this.sessionStorage = this.$sessionStorage.$$defaults;
+                }
+            },
+            beforeDestroy: function beforeDestroy() {
+                if ($$platform === BROWSER) {
+                    window.removeEventListener("storage", this.$$refreshStorageContent);
+                }
+            },
+
+            methods: {
+                $$refreshStorageContent: function $$refreshStorageContent(e) {
+                    if (e.storageArea === window.localStorage) return this.$localStorage.$refresh();
+                    if (e.storageArea === window.sessionStorage) return this.$sessionStorage.$refresh();
                 }
             }
         });
