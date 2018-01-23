@@ -1,18 +1,18 @@
 {
 	"name": "revuest",
-	"version": "1.1.4",
+	"version": "1.1.5",
 	"description": "Reactive Vue Storage",
 	"main": "revuest.js",
 	"scripts": {
 		"build": "babel index.js --out-file revuest.js"
 	},
 	"keywords": [
-        "vue.js",
-        "reactive",
-        "storage",
-        "localStorage",
-        "sessionStorage"
-    ],
+		"vue.js",
+		"reactive",
+		"storage",
+		"localStorage",
+		"sessionStorage"
+	],
 	"author": {
 		"name": "Luiz Guilherme Thess Cardoso",
 		"email": "guithess@gmail.com"

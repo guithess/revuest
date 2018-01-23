@@ -106,6 +106,8 @@ class Storage {
 
 const revuest = {
     install(Vue, options) {
+        Vue.$localStorage = new Storage(this, "localStorage");
+        Vue.$sessionStorage = new Storage(this, "sessionStorage");
         Vue.mixin({
             data() {
                 return {

@@ -144,6 +144,8 @@ var Storage = function () {
 
 var revuest = {
     install: function install(Vue, options) {
+        Vue.$localStorage = new Storage(this, "localStorage");
+        Vue.$sessionStorage = new Storage(this, "sessionStorage");
         Vue.mixin({
             data: function data() {
                 return {
